@@ -28,10 +28,10 @@ from cms.toolbar.utils import get_object_preview_url
 
 from djangocms_versioning.admin import VersioningAdminMixin
 from djangocms_versioning.constants import DRAFT, PUBLISHED
-from djangocms_versioning.helpers import version_is_locked, version_list_url
+from djangocms_versioning.helpers import version_list_url
 from djangocms_versioning.models import Version
 
-from .compat import DJANGO_4_2, create_page_content
+from .compat import DJANGO_4_2, create_page_content, version_is_locked
 from .filters import (
     AuthorFilter,
     LanguageFilter,

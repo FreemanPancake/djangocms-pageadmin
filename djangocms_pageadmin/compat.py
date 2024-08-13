@@ -11,5 +11,10 @@ CMS_41 = Version("4.1") <= Version(CMS_VERSION)
 
 if CMS_41:
     from cms.api import create_page_content  # noqa: F401
+
+    from djangocms_versioning.helpers import version_is_locked  # noqa: F401
 else:
     from cms.api import create_title as create_page_content  # noqa: F401
+
+    from djangocms_version_locking.helpers import \
+        version_is_locked  # noqa: F401
