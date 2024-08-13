@@ -5,7 +5,7 @@ import djangocms_pageadmin
 
 INSTALL_REQUIREMENTS = [
     "Django>=3.2,<5.0",
-    "django_cms",
+    "django-cms",
     "django-treebeard>=4.3",
 ]
 
@@ -27,5 +27,5 @@ setup(
     author="Fidelity International",
     url="https://github.com/FidelityInternational/djangocms-pageadmin",
     license="BSD",
-    test_suite="tests.settings.run",
+    test_suite="test_settings.run",
 )

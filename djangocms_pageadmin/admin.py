@@ -20,21 +20,18 @@ from django.utils.html import format_html, format_html_join
 from django.utils.translation import get_language, gettext_lazy as _, override
 from django.views.decorators.http import require_POST
 
-from cms import api
 from cms.admin.pageadmin import PageContentAdmin as DefaultPageContentAdmin
 from cms.extensions import extension_pool
 from cms.models import PageContent, PageUrl
 from cms.signals.apphook import set_restart_trigger
 from cms.toolbar.utils import get_object_preview_url
 
-from djangocms_version_locking.helpers import version_is_locked
-from djangocms_version_locking.models import VersionLock
 from djangocms_versioning.admin import VersioningAdminMixin
 from djangocms_versioning.constants import DRAFT, PUBLISHED
-from djangocms_versioning.helpers import version_list_url
+from djangocms_versioning.helpers import version_is_locked, version_list_url
 from djangocms_versioning.models import Version
 
-from .compat import DJANGO_4_2
+from .compat import DJANGO_4_2, create_page_content
 from .filters import (
     AuthorFilter,
     LanguageFilter,
@@ -80,10 +77,11 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         # Collect locked status to handle the requirement that lock
         # on a draft version dictates the unpublish permission
         # on a published version
-        draft_version_lock_subquery = VersionLock.objects.filter(
-            version__content_type=OuterRef("content_type"),
-            version__object_id=OuterRef("object_id"),
-            version__state=DRAFT,
+        draft_version_lock_subquery = Version.objects.filter(
+            content_type=OuterRef("content_type"),
+            object_id=OuterRef("object_id"),
+            state=DRAFT,
+            locked_by__isnull=False,
         ).order_by("-pk")
         queryset = (
             super()
@@ -97,7 +95,7 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
                 queryset=Version.objects.annotate(
                     # used by locking
                     _draft_version_user_id=Subquery(
-                        draft_version_lock_subquery.values("created_by")[:1]
+                        draft_version_lock_subquery.values("locked_by")[:1]
                     )
                 )
                 .select_related("created_by", "versionlock")
@@ -249,7 +247,6 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         if version.state not in (DRAFT, PUBLISHED):
             # Don't display the link if it can't be edited
             return ""
-
         if not version.check_edit_redirect.as_bool(request.user):
             disabled = True
 
@@ -404,9 +401,10 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
                     translations=False,
                     permissions=False,
                     extensions=False,
+                    user=request.user
                 )
 
-                new_page_content = api.create_title(
+                new_page_content = create_page_content(
                     page=new_page,
                     language=obj.language,
                     slug=form.cleaned_data["slug"],
@@ -415,7 +413,7 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
                     template=obj.template,
                     created_by=request.user,
                 )
-                new_page.title_cache[obj.language] = new_page_content
+                new_page.page_content_cache[obj.language] = new_page_content
 
                 extension_pool.copy_extensions(
                     source_page=obj.page, target_page=new_page, languages=[obj.language]

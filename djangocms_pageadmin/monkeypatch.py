@@ -29,11 +29,12 @@ def new_view_published_button(func):
         if not published_version:
             return
 
+        url = published_version.get_absolute_url() if hasattr(published_version, "get_absolute_url") else None
         if self.toolbar.edit_mode_active or self.toolbar.preview_mode_active:
             item = ButtonList(side=self.toolbar.RIGHT)
             view_published_button = ButtonWithAttributes(
                 _("View Published"),
-                url=published_version.get_absolute_url(),
+                url=url,
                 disabled=False,
                 extra_classes=['cms-btn', 'cms-btn-switch-save'],
                 html_attributes={"target": "_blank"},

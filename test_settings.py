@@ -18,7 +18,7 @@ class DisableMigrations(object):
 
 
 HELPER_SETTINGS = {
-    "SECRET_KEY": "djangocmspageadmintestsuitekey",
+    "SECRET_KEY": "djangocms-pageadmin-test-suite",
     "INSTALLED_APPS": [
         "djangocms_pageadmin",
         "djangocms_text_ckeditor",
@@ -73,7 +73,7 @@ HELPER_SETTINGS = {
 
 
 def run():
-    from djangocms_helper import runner
+    from app_helper import runner
     runner.cms("djangocms_pageadmin", extra_args=[])
 
 
