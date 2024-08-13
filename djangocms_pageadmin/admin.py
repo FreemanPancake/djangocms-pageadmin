@@ -31,7 +31,7 @@ from djangocms_versioning.constants import DRAFT, PUBLISHED
 from djangocms_versioning.helpers import version_list_url
 from djangocms_versioning.models import Version
 
-from .compat import DJANGO_4_2, create_page_content, version_is_locked
+from .compat import CMS_41, DJANGO_4_2, create_page_content, version_is_locked
 from .filters import (
     AuthorFilter,
     LanguageFilter,
@@ -77,12 +77,24 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         # Collect locked status to handle the requirement that lock
         # on a draft version dictates the unpublish permission
         # on a published version
-        draft_version_lock_subquery = Version.objects.filter(
-            content_type=OuterRef("content_type"),
-            object_id=OuterRef("object_id"),
-            state=DRAFT,
-            locked_by__isnull=False,
-        ).order_by("-pk")
+        if CMS_41:
+            draft_version_lock_subquery = Version.objects.filter(
+                content_type=OuterRef("content_type"),
+                object_id=OuterRef("object_id"),
+                state=DRAFT,
+                locked_by__isnull=False,
+            ).order_by("-pk")
+            draft_sub = Subquery(draft_version_lock_subquery.values("locked_by")[:1])
+            select_related_tuple = ("created_by", "locked_by")
+        else:
+            from djangocms_version_locking.models import VersionLock  # noqa: F401
+            draft_version_lock_subquery = VersionLock.objects.filter(
+                version__content_type=OuterRef("content_type"),
+                version__object_id=OuterRef("object_id"),
+                version__state=DRAFT,
+            ).order_by("-pk")
+            draft_sub = Subquery(draft_version_lock_subquery.values("created_by")[:1])
+            select_related_tuple = ("created_by", "versionlock")
         queryset = (
             super()
             .get_queryset(request)
@@ -94,11 +106,9 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
                 "versions",
                 queryset=Version.objects.annotate(
                     # used by locking
-                    _draft_version_user_id=Subquery(
-                        draft_version_lock_subquery.values("locked_by")[:1]
-                    )
+                    _draft_version_user_id=draft_sub
                 )
-                .select_related("created_by", "versionlock")
+                .select_related(*select_related_tuple)
                 .prefetch_related("content"),
             )
         )
@@ -395,14 +405,16 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         if request.method == "POST":
             form = DuplicateForm(request.POST, user=request.user, page_content=obj)
             if form.is_valid():
-                new_page = obj.page.copy(
-                    site=form.cleaned_data["site"],
-                    parent_node=obj.page.node.parent,
-                    translations=False,
-                    permissions=False,
-                    extensions=False,
-                    user=request.user
-                )
+                new_page_params = {
+                    "site": form.cleaned_data["site"],
+                    "parent_node": obj.page.node.parent,
+                    "translations": False,
+                    "permissions": False,
+                    "extensions": False
+                }
+                if CMS_41:
+                    new_page_params.update({"user": request.user})
+                new_page = obj.page.copy(**new_page_params)
 
                 new_page_content = create_page_content(
                     page=new_page,
@@ -413,7 +425,10 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
                     template=obj.template,
                     created_by=request.user,
                 )
-                new_page.page_content_cache[obj.language] = new_page_content
+                if CMS_41:
+                    new_page.page_content_cache[obj.language] = new_page_content
+                else:
+                    new_page.title_cache[obj.language] = new_page_content
 
                 extension_pool.copy_extensions(
                     source_page=obj.page, target_page=new_page, languages=[obj.language]
