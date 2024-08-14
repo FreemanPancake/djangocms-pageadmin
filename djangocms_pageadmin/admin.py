@@ -87,7 +87,8 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
             draft_sub = Subquery(draft_version_lock_subquery.values("locked_by")[:1])
             select_related_tuple = ("created_by", "locked_by")
         else:
-            from djangocms_version_locking.models import VersionLock  # noqa: F401
+            from djangocms_version_locking.models import \
+                VersionLock  # noqa: F401
             draft_version_lock_subquery = VersionLock.objects.filter(
                 version__content_type=OuterRef("content_type"),
                 version__object_id=OuterRef("object_id"),
@@ -168,7 +169,7 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         return returned_queryset, use_distinct
 
     def get_version(self, obj):
-        return obj.versions.all()[0]
+        return obj.versions.all().first()
 
     @admin.display(
         description=_("state")
@@ -209,11 +210,11 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
     )
     def author(self, obj):
         version = self.get_version(obj)
-        return version.created_by
+        return version.created_by or None
 
     def is_locked(self, obj):
         version = self.get_version(obj)
-        if version.state == DRAFT and version_is_locked(version):
+        if version and version.state == DRAFT and version_is_locked(version):
             return render_to_string("djangocms_version_locking/admin/locked_icon.html")
         return ""
 

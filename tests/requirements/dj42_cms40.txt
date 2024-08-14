@@ -10,7 +10,8 @@ https://github.com/django-cms/djangocms-versioning/tarball/support/django-cms-4.
 https://github.com/django-cms/djangocms-alias/tarball/support/django-cms-4.0.x#egg=djangocms-alias
 https://github.com/django-cms/djangocms-text-ckeditor/tarball/5.1.5#egg=djangocms-text-ckeditor
 https://github.com/FidelityInternational/djangocms-version-locking/tarball/release/1.3.0#egg=djangocms-version-locking
-https://github.com/FidelityInternational/djangocms-moderation/tarball/feature/django-42-compat#egg=djangocms-moderation
+https://github.com/django-cms/djangocms-moderation/tarball/master#egg=djangocms-moderation
+
 
 
 
