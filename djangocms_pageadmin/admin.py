@@ -210,7 +210,7 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
     )
     def author(self, obj):
         version = self.get_version(obj)
-        return version.created_by or None
+        return getattr(version, "created_by", None)
 
     def is_locked(self, obj):
         version = self.get_version(obj)
