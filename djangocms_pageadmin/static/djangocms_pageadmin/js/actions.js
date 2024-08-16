@@ -10,16 +10,18 @@
       /* create burger menu anchor icon */
       var anchor = document.createElement('A');
       var cssclass = document.createAttribute('class');
-      cssclass.value = 'btn cms-page-admin-action-btn closed';
+      cssclass.value = 'btn cms-action-btn closed';
       anchor.setAttributeNode(cssclass);
       var title = document.createAttribute('title');
       title.value = 'Actions';
       anchor.setAttributeNode(title);
       var icon = document.createElement('IMG');
+      var new_icon = document.createElement('span');
+      new_icon.className = "cms-icon cms-icon-menu"
       var src = document.createAttribute('src');
       src.value = pageadmin_static_url_prefix + 'svg/menu.svg';
       icon.setAttributeNode(src);
-      anchor.appendChild(icon);
+      anchor.appendChild(new_icon);
       /* create options container */
 
       var optionsContainer = document.createElement('DIV');

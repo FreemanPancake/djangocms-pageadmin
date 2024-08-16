@@ -17,10 +17,12 @@ from django.template.loader import render_to_string
 from django.urls import path, re_path, reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import format_html, format_html_join
+from django.utils.safestring import mark_safe
 from django.utils.translation import get_language, gettext_lazy as _, override
 from django.views.decorators.http import require_POST
 
 from cms.admin.pageadmin import PageContentAdmin as DefaultPageContentAdmin
+from cms.admin.utils import ChangeListActionsMixin
 from cms.extensions import extension_pool
 from cms.models import PageContent, PageUrl
 from cms.signals.apphook import set_restart_trigger
@@ -51,7 +53,7 @@ except ImportError:
 require_POST = method_decorator(require_POST)
 
 
-class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
+class PageContentAdmin(ChangeListActionsMixin, VersioningAdminMixin, DefaultPageContentAdmin):
     change_list_template = "admin/djangocms_pageadmin/pagecontent/change_list.html"
     list_display_links = None
     list_filter = (LanguageFilter, UnpublishedFilter, TemplateFilter, AuthorFilter)
@@ -215,12 +217,12 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
     def is_locked(self, obj):
         version = self.get_version(obj)
         if version and version.state == DRAFT and version_is_locked(version):
-            return render_to_string("djangocms_version_locking/admin/locked_icon.html")
+            return mark_safe('<span class="cms-icon cms-icon-lock"></span>')
         return ""
 
     def is_home(self, obj):
         if obj.page.is_home:
-            return render_to_string("djangocms_pageadmin/admin/icons/home.html")
+            return mark_safe('<span class="cms-icon cms-icon-home"></span>')
         return ""
 
     @admin.display(
@@ -247,9 +249,13 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         ]
 
     def _get_preview_link(self, obj, request, disabled=False):
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/preview.html",
-            {"url": get_object_preview_url(obj), "disabled": disabled, "keepsideframe": False},
+        return self.admin_action_button(
+            url=get_object_preview_url(obj),
+            disabled=disabled,
+            icon="view",
+            name="preview",
+            keepsideframe=False,
+            title=_("Preview"),
         )
 
     def _get_edit_link(self, obj, request, disabled=False):
@@ -269,9 +275,14 @@ class PageContentAdmin(VersioningAdminMixin, DefaultPageContentAdmin):
         )
 
         # close sideframe as edit will always be on page and not in sideframe
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/edit.html",
-            {"url": url, "disabled": disabled, "get": False, "keepsideframe": False},
+        return self.admin_action_button(
+            url=url,
+            icon="pencil",
+            title=_("Edit"),
+            name="edit",
+            disabled=disabled,
+            action="post",
+            keepsideframe=False,
         )
 
     def _get_duplicate_link(self, obj, request, disabled=False):
