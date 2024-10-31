@@ -22,7 +22,6 @@ from django.utils.translation import get_language, gettext_lazy as _, override
 from django.views.decorators.http import require_POST
 
 from cms.admin.pageadmin import PageContentAdmin as DefaultPageContentAdmin
-from cms.admin.utils import ChangeListActionsMixin
 from cms.extensions import extension_pool
 from cms.models import PageContent, PageUrl
 from cms.signals.apphook import set_restart_trigger
@@ -52,8 +51,14 @@ except ImportError:
 
 require_POST = method_decorator(require_POST)
 
+PageContentAdminBases = [ VersioningAdminMixin, DefaultPageContentAdmin ]
 
-class PageContentAdmin(ChangeListActionsMixin, VersioningAdminMixin, DefaultPageContentAdmin):
+if CMS_41:
+    from cms.admin.utils import ChangeListActionsMixin
+    PageContentAdminBases.insert(0, ChangeListActionsMixin)
+
+
+class PageContentAdmin(*PageContentAdminBases):
     change_list_template = "admin/djangocms_pageadmin/pagecontent/change_list.html"
     list_display_links = None
     list_filter = (LanguageFilter, UnpublishedFilter, TemplateFilter, AuthorFilter)
