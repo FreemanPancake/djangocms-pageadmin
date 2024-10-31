@@ -51,7 +51,7 @@ except ImportError:
 
 require_POST = method_decorator(require_POST)
 
-PageContentAdminBases = [ VersioningAdminMixin, DefaultPageContentAdmin ]
+PageContentAdminBases = [VersioningAdminMixin, DefaultPageContentAdmin]
 
 if CMS_41:
     from cms.admin.utils import ChangeListActionsMixin
