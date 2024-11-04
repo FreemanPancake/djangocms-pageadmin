@@ -86,8 +86,8 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-preview"})
-        self.assertIsNotNone(element, "Missing a.cms-page-admin-action-preview element")
+        element = soup.find("a", {"class": "cms-action-preview"})
+        self.assertIsNotNone(element, "Missing a.cms-action-preview element")
         self.assertEqual(element["title"], "Preview")
         self.assertEqual(element["href"], get_object_preview_url(pagecontent))
 
@@ -101,8 +101,8 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(request)
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-edit"})
-        self.assertIsNotNone(element, "Missing a.cms-page-admin-action-edit element")
+        element = soup.find("a", {"class": "cms-action-edit"})
+        self.assertIsNotNone(element, "Missing a.cms-action-edit element")
         self.assertEqual(element["title"], "Edit")
         self.assertEqual(
             element["href"],
@@ -118,8 +118,8 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-edit"})
-        self.assertIsNotNone(element, "Missing a.cms-page-admin-action-edit element")
+        element = soup.find("a", {"class": "cms-action-edit"})
+        self.assertIsNotNone(element, "Missing a.cms-action-edit element")
         self.assertEqual(element["title"], "Edit")
         self.assertIn("inactive", element["class"])
         self.assertNotIn("href", element)
@@ -129,9 +129,9 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-edit"})
+        element = soup.find("a", {"class": "cms-action-edit"})
         self.assertIsNot(
-            element, "Element a.cms-page-admin-action-edit is shown when it shouldn't"
+            element, "Element a.cms-action-edit is shown when it shouldn't"
         )
 
     def test_duplicate_link(self):
@@ -174,13 +174,6 @@ class ListActionsTestCase(CMSTestCase):
             element, "Missing a.cms-page-admin-action-unpublish element"
         )
         self.assertEqual(element["title"], "Unpublish")
-        # self.assertEqual(
-        #     element["href"],
-        #     reverse(
-        #         "admin:djangocms_versioning_pagecontentversion_unpublish",
-        #         args=(version.pk,),
-        #     ),
-        # )
 
     def test_unpublish_not_shown(self):
         version = PageVersionFactory()
@@ -188,6 +181,11 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
+        # element = soup.find("a", {"class": "cms-action-unpublish"})
+        # self.assertIsNone(
+        #     element,
+        #     "Element a.cms-action-unpublish is shown when it shouldn't",
+        # )
         element = soup.find("a", {"class": "cms-page-admin-action-unpublish"})
         self.assertIsNone(
             element,
@@ -527,11 +525,11 @@ class ChangelistSideframeControlsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-preview"})
+        element = soup.find("a", {"class": "cms-action-preview"})
 
         # The preview link should close the sideframe when selected
-        self.assertIn("js-page-admin-close-sideframe", element.attrs["class"])
-        self.assertNotIn("js-page-admin-keep-sideframe", element.attrs["class"])
+        self.assertIn("js-close-sideframe", element.attrs["class"])
+        self.assertNotIn("js-keep-sideframe", element.attrs["class"])
 
 
 class RegistrationTestCase(TestCase):

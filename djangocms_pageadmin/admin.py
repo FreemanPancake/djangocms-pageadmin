@@ -28,6 +28,7 @@ from cms.signals.apphook import set_restart_trigger
 from cms.toolbar.utils import get_object_preview_url
 
 from djangocms_versioning.admin import VersioningAdminMixin
+from djangocms_versioning.conf import LOCK_VERSIONS
 from djangocms_versioning.constants import DRAFT, PUBLISHED
 from djangocms_versioning.helpers import version_list_url
 from djangocms_versioning.models import Version
@@ -73,7 +74,10 @@ class PageContentAdmin(*PageContentAdminBases):
     search_fields = ("title",)
 
     def get_list_display(self, request):
-        return self._list_display + [self._list_actions(request)]
+        list_display = self._list_display + [self._list_actions(request)]
+        if LOCK_VERSIONS:
+            list_display.insert(list_display.index('state'), 'is_locked')
+        return list_display
 
     def get_queryset(self, request):
         """Filter PageContent objects by current site of the request.
@@ -219,16 +223,21 @@ class PageContentAdmin(*PageContentAdminBases):
         version = self.get_version(obj)
         return getattr(version, "created_by", None)
 
+    @admin.display(
+        description=_("is locked")
+    )
     def is_locked(self, obj):
         version = self.get_version(obj)
         if version and version.state == DRAFT and version_is_locked(version):
             return mark_safe('<span class="cms-icon cms-icon-lock"></span>')
-        return ""
+        else:
+            return ""
 
     def is_home(self, obj):
         if obj.page.is_home:
             return mark_safe('<span class="cms-icon cms-icon-home"></span>')
-        return ""
+        else:
+            return ""
 
     @admin.display(
         description=_("modified date"),

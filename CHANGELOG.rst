@@ -2,6 +2,13 @@
 Changelog
 =========
 
+Unreleased
+==========
+* Dropped support for Django < 4.2
+* Dropped support for Django CMS < 4.1
+* Add suppor for Django CMS 4.1
+* Added support for Python 3.11
+
 1.7.1 (2024-06-06)
 =================
 * Fixed edit link in pageadmin to close sideframe
