@@ -140,9 +140,9 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-duplicate"})
+        element = soup.find("a", {"class": "cms-action-duplicate"})
         self.assertIsNotNone(
-            element, "Missing a.cms-page-admin-action-duplicate element"
+            element, "Missing a.cms-action-duplicate element"
         )
         self.assertEqual(element["title"], "Duplicate")
         self.assertEqual(
@@ -156,7 +156,7 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-set-home"})
+        element = soup.find("a", {"class": "cms-action-set-home"})
         self.assertEqual(element["title"], "Set as a home")
         self.assertEqual(
             element["href"],
@@ -169,9 +169,9 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-unpublish"})
+        element = soup.find("a", {"class": "cms-action-unpublish"})
         self.assertIsNotNone(
-            element, "Missing a.cms-page-admin-action-unpublish element"
+            element, "Missing a.cms-action-unpublish element"
         )
         self.assertEqual(element["title"], "Unpublish")
 
@@ -186,10 +186,10 @@ class ListActionsTestCase(CMSTestCase):
         #     element,
         #     "Element a.cms-action-unpublish is shown when it shouldn't",
         # )
-        element = soup.find("a", {"class": "cms-page-admin-action-unpublish"})
+        element = soup.find("a", {"class": "cms-action-unpublish"})
         self.assertIsNone(
             element,
-            "Element a.cms-page-admin-action-unpublish is shown when it shouldn't",
+            "Element a.cms-action-unpublish is shown when it shouldn't",
         )
 
     def test_manage_versions_link(self):
@@ -197,9 +197,9 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-manage-versions"})
+        element = soup.find("a", {"class": "cms-action-manage-versions"})
         self.assertIsNotNone(
-            element, "Missing a.cms-page-admin-action-manage-versions element"
+            element, "Missing a.cms-action-manage-versions element"
         )
         self.assertEqual(element["title"], "Manage versions")
         self.assertEqual(element["href"], version_list_url(pagecontent))
@@ -209,9 +209,9 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-basic-settings"})
+        element = soup.find("a", {"class": "cms-action-basic-settings"})
         self.assertIsNotNone(
-            element, "Missing a.cms-page-admin-action-basic-settings element"
+            element, "Missing a.cms-action-basic-settings element"
         )
         self.assertEqual(element["title"], "Basic settings")
         self.assertEqual(
@@ -224,9 +224,9 @@ class ListActionsTestCase(CMSTestCase):
         func = self.modeladmin._list_actions(self.get_request("/"))
         response = func(pagecontent)
         soup = parse_html(response)
-        element = soup.find("a", {"class": "cms-page-admin-action-advanced-settings"})
+        element = soup.find("a", {"class": "cms-action-advanced-settings"})
         self.assertIsNotNone(
-            element, "Missing a.cms-page-admin-action-advanced-settings element"
+            element, "Missing a.cms-action-advanced-settings element"
         )
         self.assertEqual(element["title"], "Advanced settings")
         self.assertEqual(
@@ -513,8 +513,8 @@ class ChangelistSideframeControlsTestCase(CMSTestCase):
         url_markup = self.modeladmin.url(pagecontent)
 
         # The url link should close the sideframe when selected
-        self.assertIn("js-page-admin-close-sideframe", url_markup)
-        self.assertNotIn("js-page-admin-keep-sideframe", url_markup)
+        self.assertIn("js-close-sideframe", url_markup)
+        self.assertNotIn("js-keep-sideframe", url_markup)
 
     def test_preview_link_doesnt_open_in_sideframe(self):
         """
