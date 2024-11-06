@@ -13,7 +13,6 @@ from django.http import (
     HttpResponseRedirect,
 )
 from django.shortcuts import redirect, render
-from django.template.loader import render_to_string
 from django.urls import path, re_path, reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import format_html, format_html_join
@@ -201,7 +200,7 @@ class PageContentAdmin(*PageContentAdminBases):
             if path:
                 url = reverse("pages-details-by-slug", kwargs={"slug": path})
         if url is not None and csv is False:
-            return format_html('<a class="js-page-admin-close-sideframe" href="{url}">{url}</a>', url=url)
+            return format_html('<a class="js-close-sideframe" href="{url}">{url}</a>', url=url)
         return url
 
     @admin.display(
@@ -307,9 +306,12 @@ class PageContentAdmin(*PageContentAdminBases):
             args=(obj.pk,),
         )
 
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/duplicate.html",
-            {"url": url, "disabled": disabled},
+        return self.admin_action_button(
+            url=url,
+            icon="copy",
+            title=_("Duplicate"),
+            name="duplicate",
+            disabled=disabled,
         )
 
     def _set_home_link(self, obj, request, disabled=False):
@@ -324,9 +326,13 @@ class PageContentAdmin(*PageContentAdminBases):
             args=(obj.pk,),
         )
 
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/set_home.html",
-            {"url": url, "disabled": disabled, "action": True, "get": False},
+        return self.admin_action_button(
+            url=url,
+            icon="home",
+            title=_("Set as a home"),
+            name="set-home",
+            disabled=disabled,
+            action="post",
         )
 
     def _get_unpublish_link(self, obj, request, disabled=False):
@@ -348,30 +354,42 @@ class PageContentAdmin(*PageContentAdminBases):
         ):
             disabled = True
 
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/unpublish.html",
-            {"url": url, "disabled": disabled},
+        return self.admin_action_button(
+            url=url,
+            icon="unpublish",
+            title=_("Unpublish"),
+            name="unpublish",
+            disabled=disabled,
         )
 
     def _get_manage_versions_link(self, obj, request, disabled=False):
         url = version_list_url(obj)
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/manage_versions.html",
-            {"url": url, "disabled": disabled, "action": False},
+        return self.admin_action_button(
+            url=url,
+            icon="list-ol",
+            title=_("Manage versions"),
+            name="manage-versions",
+            disabled=disabled,
         )
 
     def _get_basic_settings_link(self, obj, request, disabled=False):
         url = reverse("admin:cms_pagecontent_change", args=(obj.pk,))
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/basic_settings.html",
-            {"url": url, "disabled": disabled, "action": False},
+        return self.admin_action_button(
+            url=url,
+            icon="settings",
+            title=_("Basic settings"),
+            name="basic-settings",
+            disabled=disabled,
         )
 
     def _get_advanced_settings_link(self, obj, request, disabled=False):
         url = reverse("admin:cms_page_advanced", args=(obj.page_id,))
-        return render_to_string(
-            "djangocms_pageadmin/admin/icons/advanced_settings.html",
-            {"url": url, "disabled": disabled, "action": False},
+        return self.admin_action_button(
+            url=url,
+            icon="advanced-settings",
+            title=_("Advanced settings"),
+            name="advanced-settings",
+            disabled=disabled,
         )
 
     def _list_actions(self, request):

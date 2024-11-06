@@ -14,10 +14,6 @@
     word-break: break-all;
     white-space: normal !important;
 }
-.cms-version-locked-status-icon img, .cms-page-admin-home img {
-    width: 15px;
-    height: 15px;
-}
 .cms-icon-menu {
     cursor: pointer;
 }
@@ -52,15 +48,8 @@
     background-color: #e1e1e1 !important;
 }
 
-.btn.cms-action-btn.inactive img {
+.btn.cms-action-btn.inactive span {
     opacity: 0.5;
-}
-
-/* set size and spacing between for the action icons */
-a.btn.cms-action-btn img {
-    width: 20px;
-    height: 20px;
-    margin-right: 4px;
 }
 
 /*-------------------------------------
@@ -86,17 +75,9 @@ ul.cms-pagetree-dropdown-menu-inner li:hover {
     background-color: #0bf;
 }
 
-/* set the size of the option icon */
-.cms-page-admin-action-burger-options-anchor img{
-    width: 20px;
-    height: 20px;
-}
-
 /* align the option text with it's icon */
 ul.cms-pagetree-dropdown-menu-inner li a span {
     line-height: 1rem;
-    vertical-align: 20%;
-    margin-left: 10px;
 }
 
 /* disable any inactive option */

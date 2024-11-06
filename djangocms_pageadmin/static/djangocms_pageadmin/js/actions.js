@@ -7,23 +7,21 @@
 
   $(function () {
     var createBurgerMenu = function createBurgerMenu(row) {
-      /* create burger menu anchor icon */
+      /* create burger menu anchor section */
       var anchor = document.createElement('A');
       var cssclass = document.createAttribute('class');
       cssclass.value = 'btn cms-action-btn closed';
       anchor.setAttributeNode(cssclass);
+      //  create burger menu title
       var title = document.createAttribute('title');
       title.value = 'Actions';
       anchor.setAttributeNode(title);
-      var icon = document.createElement('IMG');
-      var new_icon = document.createElement('span');
-      new_icon.className = "cms-icon cms-icon-menu"
-      var src = document.createAttribute('src');
-      src.value = pageadmin_static_url_prefix + 'svg/menu.svg';
-      icon.setAttributeNode(src);
-      anchor.appendChild(new_icon);
-      /* create options container */
+      // create burger menu icon
+      var menu_icon = document.createElement('span');
+      menu_icon.className = "cms-icon cms-icon-menu";
+      anchor.appendChild(menu_icon);
 
+      /* create options container */
       var optionsContainer = document.createElement('DIV');
       cssclass = document.createAttribute('class');
       cssclass.value = 'cms-pagetree-dropdown-menu ' + // main selector for the menu
@@ -45,10 +43,10 @@
         return;
       }
 
-      $(actions[0]).children('.cms-page-admin-action-btn').each(function (index, item) {
+      $(actions[0]).children('.cms-action-btn').each(function (index, item) {
         /* exclude preview and edit buttons */
-        if (item.classList.contains('cms-page-admin-action-preview') ||
-            item.classList.contains('cms-page-admin-action-edit')) {
+        if (item.classList.contains('cms-action-preview') ||
+            item.classList.contains('cms-action-edit')) {
           return;
         }
 
@@ -70,8 +68,8 @@
         li_anchor.setAttributeNode(href);
         /* move the an image element */
 
-        var existing_img = $(item).children('img');
-        li_anchor.appendChild(existing_img[0]);
+        var existing_icon_span = $(item).children('span');
+        li_anchor.appendChild(existing_icon_span[0]);
         /* create the button text */
 
         text = document.createTextNode(item.title);
@@ -129,8 +127,8 @@
     var closeBurgerMenu = function closeBurgerMenu() {
       $('.cms-pagetree-dropdown-menu').removeClass('open');
       $('.cms-pagetree-dropdown-menu').addClass('closed');
-      $('.cms-page-admin-action-btn').removeClass('open');
-      $('.cms-page-admin-action-btn').addClass('closed');
+      $('.cms-action-btn').removeClass('open');
+      $('.cms-action-btn').addClass('closed');
     };
 
     $('#result_list').find('tr').each(function (index, item) {
@@ -147,7 +145,7 @@
 
       var csrfToken = '<input type="hidden" name="csrfmiddlewaretoken" value="' + document.cookie.match(/csrftoken=([^;]*);?/)[1] + '">';
       var fakeForm = $('<form style="display: none" action="' + action.attr('href') + '" method="' + formMethod + '">' + csrfToken + '</form>');
-      var keepSideFrame = action.attr('class').indexOf('js-page-admin-keep-sideframe') !== -1; // always break out of the sideframe, cause it was never meant to open cms views inside it
+      var keepSideFrame = action.attr('class').indexOf('js-keep-sideframe') !== -1; // always break out of the sideframe, cause it was never meant to open cms views inside it
 
       try {
         if (!keepSideFrame) {
@@ -164,8 +162,8 @@
       fakeForm.appendTo(body).submit();
     };
 
-    $('.js-page-admin-action, .cms-page-admin-js-publish-btn, .cms-page-admin-js-edit-btn, .cms-page-admin-action-burger-options-anchor').on('click', fakeForm);
-    $('.js-page-admin-close-sideframe').on('click', function () {
+    $('.js-action, .cms-js-publish-btn, .cms-js-edit-btn, .cms-page-admin-action-burger-options-anchor').on('click', fakeForm);
+    $('.js-close-sideframe').on('click', function () {
       try {
         window.top.CMS.API.Sideframe.close();
       } catch (e) {}
