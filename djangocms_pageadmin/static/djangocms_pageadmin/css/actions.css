@@ -98,3 +98,13 @@ ul.cms-pagetree-dropdown-menu-inner li a.inactive {
 .cms-pagetree-dropdown-menu.closed, .cms-icon-menu.closed .cms-pagetree-dropdown-menu {
     display: none;
 }
+
+
+/* restore the removed drop down menu position style */
+.cms-pagetree-dropdown-menu-arrow-right-top:before {
+    top: 16px;
+}
+
+.cms-pagetree-dropdown-menu-arrow-right-bottom:before {
+    bottom: 18px;
+}

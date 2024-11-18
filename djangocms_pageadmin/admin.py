@@ -73,10 +73,7 @@ class PageContentAdmin(*PageContentAdminBases):
     search_fields = ("title",)
 
     def get_list_display(self, request):
-        list_display = self._list_display + [self._list_actions(request)]
-        if LOCK_VERSIONS:
-            list_display.insert(list_display.index('state'), 'is_locked')
-        return list_display
+        return self._list_display + [self._list_actions(request)]
 
     def get_queryset(self, request):
         """Filter PageContent objects by current site of the request.
