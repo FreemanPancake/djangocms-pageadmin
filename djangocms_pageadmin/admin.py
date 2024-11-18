@@ -93,7 +93,8 @@ class PageContentAdmin(*PageContentAdminBases):
             draft_sub = Subquery(draft_version_lock_subquery.values("locked_by")[:1])
             select_related_tuple = ("created_by", "locked_by")
         else:
-            from djangocms_version_locking.models import VersionLock  # noqa: F401
+            from djangocms_version_locking.models import \
+                VersionLock  # noqa: F401
             draft_version_lock_subquery = VersionLock.objects.filter(
                 version__content_type=OuterRef("content_type"),
                 version__object_id=OuterRef("object_id"),
