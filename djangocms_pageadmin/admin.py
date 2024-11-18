@@ -27,7 +27,6 @@ from cms.signals.apphook import set_restart_trigger
 from cms.toolbar.utils import get_object_preview_url
 
 from djangocms_versioning.admin import VersioningAdminMixin
-from djangocms_versioning.conf import LOCK_VERSIONS
 from djangocms_versioning.constants import DRAFT, PUBLISHED
 from djangocms_versioning.helpers import version_list_url
 from djangocms_versioning.models import Version
@@ -94,8 +93,7 @@ class PageContentAdmin(*PageContentAdminBases):
             draft_sub = Subquery(draft_version_lock_subquery.values("locked_by")[:1])
             select_related_tuple = ("created_by", "locked_by")
         else:
-            from djangocms_version_locking.models import \
-                VersionLock  # noqa: F401
+            from djangocms_version_locking.models import VersionLock  # noqa: F401
             draft_version_lock_subquery = VersionLock.objects.filter(
                 version__content_type=OuterRef("content_type"),
                 version__object_id=OuterRef("object_id"),
