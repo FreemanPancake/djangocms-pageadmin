@@ -8,6 +8,7 @@ Unreleased
 * Dropped support for Django CMS < 4.1
 * Add support for Django CMS 4.1
 * Added support for Python 3.11
+* remove action burger menu from this addon, as this has been integrated in djangocms-version-locking.
 
 1.7.1 (2024-06-06)
 =================

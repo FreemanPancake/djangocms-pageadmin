@@ -640,9 +640,6 @@ class PageContentAdmin(*PageContentAdminBases):
 
         return cl.get_queryset(request)
 
-    class Media:
-        css = {"all": ("djangocms_pageadmin/css/actions.css",)}
-
 
 admin.site.unregister(PageContent)
 admin.site.register(PageContent, PageContentAdmin)
