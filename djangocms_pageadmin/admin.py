@@ -21,6 +21,8 @@ from django.utils.translation import get_language, gettext_lazy as _, override
 from django.views.decorators.http import require_POST
 
 from cms.admin.pageadmin import PageContentAdmin as DefaultPageContentAdmin
+from cms.admin.utils import ChangeListActionsMixin
+from cms.api import create_page_content
 from cms.extensions import extension_pool
 from cms.models import PageContent, PageUrl
 from cms.signals.apphook import set_restart_trigger
@@ -28,10 +30,9 @@ from cms.toolbar.utils import get_object_preview_url
 
 from djangocms_versioning.admin import VersioningAdminMixin
 from djangocms_versioning.constants import DRAFT, PUBLISHED
-from djangocms_versioning.helpers import version_list_url
+from djangocms_versioning.helpers import version_is_locked, version_list_url
 from djangocms_versioning.models import Version
 
-from .compat import CMS_41, DJANGO_4_2, create_page_content, version_is_locked
 from .filters import (
     AuthorFilter,
     LanguageFilter,
@@ -50,14 +51,8 @@ except ImportError:
 
 require_POST = method_decorator(require_POST)
 
-PageContentAdminBases = [VersioningAdminMixin, DefaultPageContentAdmin]
 
-if CMS_41:
-    from cms.admin.utils import ChangeListActionsMixin
-    PageContentAdminBases.insert(0, ChangeListActionsMixin)
-
-
-class PageContentAdmin(*PageContentAdminBases):
+class PageContentAdmin(ChangeListActionsMixin, VersioningAdminMixin, DefaultPageContentAdmin):
     change_list_template = "admin/djangocms_pageadmin/pagecontent/change_list.html"
     list_display_links = None
     list_filter = (LanguageFilter, UnpublishedFilter, TemplateFilter, AuthorFilter)
@@ -83,25 +78,14 @@ class PageContentAdmin(*PageContentAdminBases):
         # Collect locked status to handle the requirement that lock
         # on a draft version dictates the unpublish permission
         # on a published version
-        if CMS_41:
-            draft_version_lock_subquery = Version.objects.filter(
-                content_type=OuterRef("content_type"),
-                object_id=OuterRef("object_id"),
-                state=DRAFT,
-                locked_by__isnull=False,
-            ).order_by("-pk")
-            draft_sub = Subquery(draft_version_lock_subquery.values("locked_by")[:1])
-            select_related_tuple = ("created_by", "locked_by")
-        else:
-            from djangocms_version_locking.models import \
-                VersionLock  # noqa: F401
-            draft_version_lock_subquery = VersionLock.objects.filter(
-                version__content_type=OuterRef("content_type"),
-                version__object_id=OuterRef("object_id"),
-                version__state=DRAFT,
-            ).order_by("-pk")
-            draft_sub = Subquery(draft_version_lock_subquery.values("created_by")[:1])
-            select_related_tuple = ("created_by", "versionlock")
+        draft_version_lock_subquery = Version.objects.filter(
+            content_type=OuterRef("content_type"),
+            object_id=OuterRef("object_id"),
+            state=DRAFT,
+            locked_by__isnull=False,
+        ).order_by("-pk")
+        draft_sub = Subquery(draft_version_lock_subquery.values("locked_by")[:1])
+        select_related_tuple = ("created_by", "locked_by")
         queryset = (
             super()
             .get_queryset(request)
@@ -450,10 +434,9 @@ class PageContentAdmin(*PageContentAdminBases):
                     "parent_node": obj.page.node.parent,
                     "translations": False,
                     "permissions": False,
-                    "extensions": False
+                    "extensions": False,
+                    "user": request.user
                 }
-                if CMS_41:
-                    new_page_params.update({"user": request.user})
                 new_page = obj.page.copy(**new_page_params)
 
                 new_page_content = create_page_content(
@@ -465,10 +448,7 @@ class PageContentAdmin(*PageContentAdminBases):
                     template=obj.template,
                     created_by=request.user,
                 )
-                if CMS_41:
-                    new_page.page_content_cache[obj.language] = new_page_content
-                else:
-                    new_page.title_cache[obj.language] = new_page_content
+                new_page.page_content_cache[obj.language] = new_page_content
 
                 extension_pool.copy_extensions(
                     source_page=obj.page, target_page=new_page, languages=[obj.language]
@@ -631,11 +611,10 @@ class PageContentAdmin(*PageContentAdminBases):
             'list_max_show_all': self.list_max_show_all,
             'list_editable': self.list_editable,
             'model_admin': self,
-            'sortable_by': self.sortable_by
+            'sortable_by': self.sortable_by,
+            'search_help_text': self.search_help_text
         }
 
-        if DJANGO_4_2:
-            changelist_kwargs.update({'search_help_text': self.search_help_text})
         cl = changelist(**changelist_kwargs)
 
         return cl.get_queryset(request)
